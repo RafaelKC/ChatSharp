@@ -2,10 +2,12 @@ using WebSocketManager;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSignalR();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddWebSocketManager()
     .AddSingleton<WebSocketConnectionManager>();
+
 
 var app = builder.Build();
 

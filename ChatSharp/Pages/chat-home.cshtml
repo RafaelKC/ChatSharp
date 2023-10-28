@@ -1,0 +1,57 @@
+@page "/char-home"
+@using Microsoft.AspNetCore.SignalR.Client
+@model BlazorApp.Pages.chat_home
+
+
+@functions
+{
+    private string messageToSend = "";
+    
+    private List<string> receivedMessages = new List<string>();
+    private HubConnection hubConnection;
+
+    private async Task ConnectToWebSocket()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl("/chat") // URL to your SignalR hub
+            .Build();
+
+        hubConnection.On<string>("chat", receivedMessage =>
+        {
+            receivedMessages.Add(receivedMessage);
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    private async Task SendMessage()
+    {
+        if (!string.IsNullOrWhiteSpace(messageToSend))
+        {
+            var hubConnection = new HubConnectionBuilder()
+                .WithUrl("/chat")
+                .Build();
+
+            await hubConnection.StartAsync();
+            await hubConnection.SendAsync("SendMessage", messageToSend);
+            await hubConnection.DisposeAsync();
+        }
+    }
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+ <div id="chat-container">
+     @foreach (var message in receivedMessages)
+     {
+         <div>@message</div>
+     }
+     <input type="text" id="message" autocomplete="off"  @bind="messageToSend"/><button @onclick="SendMessage">Send</button>
+ </div>
+</body>
+</html>
